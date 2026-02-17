@@ -130,11 +130,68 @@
         ::-webkit-scrollbar-thumb {
             background: #c27c15;
         }
+
+        #skip-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        #skip-modal.active {
+            display: flex;
+        }
+        #skip-box {
+            border: 1px solid #c27c15;
+            background: #000;
+            padding: 24px 32px;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            color: #c27c15;
+            max-width: 480px;
+            text-align: center;
+        }
+        #skip-box p {
+            margin-bottom: 18px;
+            line-height: 1.6;
+            white-space: normal;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .modal-btns button {
+            background: #000;
+            border: 1px solid #c27c15;
+            color: #c27c15;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            padding: 6px 20px;
+            cursor: pointer;
+        }
+        .modal-btns button:hover {
+            background: #c27c15;
+            color: #000;
+        }
     </style>
 </head>
 <body>
     <div class="container" id="terminal">
         <div class="ascii-logo" id="asciiLogo"></div>
+    </div>
+
+    <div id="skip-modal">
+        <div id="skip-box">
+            <p>yea biggie click skip or be w mans and read secrets i hid in the code</p>
+            <div class="modal-btns">
+                <button id="btn-skip">Skip</button>
+                <button id="btn-stay">Stay</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -175,16 +232,13 @@
             "diddy case takes place",
             "epstein files blows up again",
             "epstein memes arise",
-            "epstein rape niggers or",
-            "epstein fuck niggers",
             "full files release",
             "3 million files released",
             "people unredacting it",
             "EPSTEIN NOT DEAD",
             "did you know trump was mentioned 100x more than god was in the bible in the stein files",
             "epstein was toxic",
-            "fuck warren he aint give me a chip",
-            "hokwa ur ass aint safe either how am i big when matt was asking too fuck you bitch glazing ass nigga"
+            "fuck warren he aint give me a chip"
         ];
         
         const moduleVariations = [
@@ -571,10 +625,12 @@
                 bootTime += 0.001000;
                 addBootMessage(bootTime, "ok", "Opening new tab...");
                 
-                const newTab = window.open('about:blank', '_blank');
+                let newTab = null;
+                try { newTab = window.open('about:blank', '_blank'); } catch(e) {}
                 
                 if (newTab) {
-                    fetch(siteUrl)
+                    const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(siteUrl);
+                    fetch(proxyUrl)
                         .then(response => response.text())
                         .then(html => {
                             newTab.document.open();
@@ -587,25 +643,19 @@
                             setTimeout(() => {
                                 bootTime += 0.001000;
                                 addBootMessage(bootTime, "info", "Closing boot terminal...");
-                                
-                                setTimeout(() => {
-                                    window.close();
-                                }, 1000);
+                                setTimeout(() => { try { window.close(); } catch(e) {} }, 1000);
                             }, 1500);
                         })
                         .catch(error => {
                             bootTime += 0.001000;
                             addBootMessage(bootTime, "err", `Failed to load tutor interface: ${error.message}`);
                             addBootMessage(bootTime, "info", "Press any key to retry");
-                            
-                            document.addEventListener('keydown', () => {
-                                location.reload();
-                            });
+                            document.addEventListener('keydown', () => { location.reload(); });
                         });
                 } else {
                     bootTime += 0.001000;
                     addBootMessage(bootTime, "err", "Popup blocked. Please allow popups and refresh.");
-                    addBootMessage(bootTime, "info", "Or visit: " + siteUrl.replace('raw.githubusercontent.com', 'noahs-calculus-tutor.pages.dev'));
+                    addBootMessage(bootTime, "info", "Or visit: " + siteUrl);
                 }
                 
                 terminal.scrollTop = terminal.scrollHeight;
@@ -615,25 +665,29 @@
         function showSkipPrompt() {
             setTimeout(() => {
                 if (!skipConfirmed) {
-                    const skip = confirm("yea biggie click that skip button or read all the secrets i hid in the code to talk to yall);
-                    if (skip) {
+                    const modal = document.getElementById('skip-modal');
+                    modal.classList.add('active');
+
+                    document.getElementById('btn-skip').onclick = () => {
+                        modal.classList.remove('active');
                         skipLoading = true;
                         skipRequested = true;
                         skipConfirmed = true;
-                        
                         bootTime += 0.001000;
                         addBootMessage(bootTime, "info", "yea fatass go ahead and play");
-                        
                         setTimeout(() => {
                             bootTime += 0.001000;
                             addBootMessage(bootTime, "ok", "Boot sequence accelerated");
                             setTimeout(finishBoot, 300);
                         }, 500);
-                    } else {
+                    };
+
+                    document.getElementById('btn-stay').onclick = () => {
+                        modal.classList.remove('active');
                         skipConfirmed = true;
                         bootTime += 0.001000;
                         addBootMessage(bootTime, "info", "Continuing full boot sequence...");
-                    }
+                    };
                 }
             }, 2000);
         }
@@ -644,5 +698,4 @@
         }, 800);
     </script>
 </body>
-
 </html>
